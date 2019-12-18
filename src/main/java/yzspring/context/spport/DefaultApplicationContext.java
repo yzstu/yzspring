@@ -1,6 +1,11 @@
 package yzspring.context.spport;
 
+import yzspring.beans.config.BeanDefinition;
+import yzspring.beans.spport.BeanDefinitionReader;
 import yzspring.context.ApplicationContext;
+
+import java.io.FilterReader;
+import java.util.List;
 
 /**
  * 类描述
@@ -12,6 +17,8 @@ public class DefaultApplicationContext implements ApplicationContext{
 
     //配置文件路径
     private String configLocaltion;
+    //reader
+    BeanDefinitionReader reader;
 
     public DefaultApplicationContext(String configLocaltion) {
         this.configLocaltion = configLocaltion;
@@ -26,9 +33,9 @@ public class DefaultApplicationContext implements ApplicationContext{
     private void refresh() throws Exception{
 
         //1、定位，定位配置文件
-        
+         reader = new BeanDefinitionReader(this.configLocaltion);
         //2、加载配置文件，扫描相关的类，把它们封装成BeanDefinition
-
+        List<BeanDefinition> beanDefinitions = reader.loadBeanDefinitions();
         //3、注册，把配置信息放到容器里面(伪IOC容器)
         //到这里为止，容器初始化完毕
 
