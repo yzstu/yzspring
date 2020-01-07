@@ -65,6 +65,15 @@ public class BeanDefinitionReader {
         return properties;
     }
 
+    /**
+     *@描述 加载配置文件中所设置的目录下的所有class，并将其信息封装到List<BeanDefinition>中
+     *@方法名 loadBeanDefinitions
+     *@参数  []
+     *@返回值  java.util.List<yzspring.beans.config.BeanDefinition>
+     *@创建人  Baldwin
+     *@创建时间  2020/1/7
+     *@修改人和其它信息
+     */
     public List<BeanDefinition> loadBeanDefinitions() {
         List<BeanDefinition> resultList = new ArrayList<>();
 

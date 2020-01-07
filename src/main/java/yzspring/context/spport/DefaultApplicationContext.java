@@ -45,7 +45,19 @@ public class DefaultApplicationContext implements ApplicationContext{
         doSpringBeanDefinitionRegist(beanDefinitions);
 
         //4、把不是延时加载的类，提前初始化
+        doAutowired();
+    }
 
+    private void doAutowired() {
+        for (String factoryName : beanDefinitionMap.keySet()){
+            if (!beanDefinitionMap.get(factoryName).isLazyInit()){
+                try {
+                    getBean(factoryName);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        }
     }
 
     private void doSpringBeanDefinitionRegist(List<BeanDefinition> beanDefinitions) throws Exception {
