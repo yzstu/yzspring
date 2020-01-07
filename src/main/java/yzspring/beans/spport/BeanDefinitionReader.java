@@ -1,11 +1,13 @@
 package yzspring.beans.spport;
 
 import jdk.nashorn.internal.runtime.arrays.ContinuousArrayData;
+import yzspring.annotation.YzComponent;
 import yzspring.beans.config.BeanDefinition;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.annotation.Annotation;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
@@ -64,6 +66,67 @@ public class BeanDefinitionReader {
     }
 
     public List<BeanDefinition> loadBeanDefinitions() {
-        return null ;
+        List<BeanDefinition> resultList = new ArrayList<>();
+
+        try {
+            for (String className : registyBeanClasses){
+
+                //根据类名找到类
+                Class<?> clazz = Class.forName(className);
+                //接口不需要实例化
+                if (clazz.isInterface()){
+                    continue;
+                }
+
+                //获取类的所有注解
+                Annotation[] annotations = clazz.getAnnotations();
+                //没有注解，跳过
+                if (0 == annotations.length){
+                    continue;
+                }
+
+                for (Annotation annotation : annotations){
+                    Class<? extends Annotation> annotationType = annotation.annotationType();
+                    //目前只考虑YzComponent
+                    if (annotationType.isAnnotationPresent(YzComponent.class)){
+                        //这里处理符合我们要求的信息
+                        //factoryName 默认首字母小写，所以这里进行了转化
+                        //此处不考虑自定义变量名
+                        resultList.add(doCreateBeanDefinition(getFactoryName(clazz.getSimpleName()),clazz.getName()));
+
+                        Class<?>[] interfaces = clazz.getInterfaces();
+                        //注入接口
+                        for (Class<?> interf : interfaces){
+                            resultList.add(doCreateBeanDefinition(interf.getName(),interf.getName()));
+                        }
+                    }
+                }
+            }
+
+        }catch (ClassNotFoundException e){
+            System.out.println(e);
+        }
+        return resultList;
     }
+
+    private String getFactoryName(String simpleName) {
+
+        char[] factoryNameChars = simpleName.toCharArray();
+        factoryNameChars[0] += 32;
+
+        return new String(factoryNameChars);
+    }
+
+    private BeanDefinition doCreateBeanDefinition(String factoryName, String beanName) {
+        BeanDefinition beanDefinition = new BeanDefinition();
+
+        //保存类的工厂中的名字或者接口的全类名
+        beanDefinition.setFactoryBeanName(factoryName);
+        //保存类或者接口的全类名
+        beanDefinition.setBeanClassName(beanName);
+
+        return beanDefinition;
+    }
+
+
 }
